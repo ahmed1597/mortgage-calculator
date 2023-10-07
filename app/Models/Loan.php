@@ -10,6 +10,11 @@ class Loan extends Model
     protected $fillable = ['loan_amount', 'annual_interest_rate', 'loan_term'];
     private $memo = [];
 
+    public function borrower()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function amortizationSchedules()
     {
         return $this->hasMany(AmortizationSchedule::class);
