@@ -40,6 +40,14 @@ class LoanController extends Controller
         return redirect()->route('loan.show', ['loan' => $loan->id]);
     }
 
+    public function showRecalculatedLoan(Loan $loan)
+    {
+        // Calculate effective interest rate and prepare data for the view
+        $effectiveInterestRate = $loan->calculateEffectiveInterestRate();
+        
+        return view('extra_repayment.show', compact('loan', 'effectiveInterestRate'));
+    }
+
     protected function validateLoanRequest(Request $request)
     {
         $request->validate([

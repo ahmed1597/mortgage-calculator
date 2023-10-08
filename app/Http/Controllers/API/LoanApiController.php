@@ -41,6 +41,14 @@ class LoanApiController extends Controller
         return response()->json(['message' => 'Extra repayment applied successfully']);
     }
 
+    public function showRecalculatedLoan(Loan $loan)
+    {
+        // Calculate effective interest rate and prepare data for the API response
+        $effectiveInterestRate = $loan->calculateEffectiveInterestRate();
+
+        return response()->json(['loan' => $loan, 'effective_interest_rate' => $effectiveInterestRate]);
+    }
+
     protected function validateLoanRequest(Request $request)
     {
         $request->validate([

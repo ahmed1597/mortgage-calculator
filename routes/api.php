@@ -1,19 +1,19 @@
-<?php
+<?php 
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\LoanApiController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
+// API route for listing all loans (Get a list of all loans)
+Route::get('/api/loans', [LoanApiController::class, 'index']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// API route for creating a new loan (Store the loan details in the database)
+Route::post('/api/loans', [LoanApiController::class, 'store']);
+
+// API route for displaying loan details (Get the original loan details)
+Route::get('/api/loans/{loan}', [LoanApiController::class, 'show'])->name('api.loans.show');
+
+// API route for applying extra repayments to a loan (Update the loan with extra repayment amount)
+Route::post('/api/loans/{loan}/apply-extra-repayment', [LoanApiController::class, 'applyExtraRepayment']);
+
+// New API route for showing recalculated loan details after extra repayments (Display recalculated loan and effective interest rate)
+Route::get('/api/loans/{loan}/show-recalculated', [LoanApiController::class, 'showRecalculatedLoan']);
