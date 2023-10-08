@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Loan extends Model
 {
@@ -50,9 +52,9 @@ class Loan extends Model
 
         while ($monthNumber <= $this->loan_term * 12) {
             $scheduleData = $this->calculateMonthlyComponents($loanBalance, $monthlyPayment);
-            $this->createAmortizationRecord($monthNumber, $scheduleData);
+            $create_amortization = $this->createAmortizationRecord($monthNumber, $scheduleData);
 
-            $loanBalance = $scheduleData['ending_balance'];
+            $loanBalance = $scheduleData['endingBalance'];
             $monthNumber++;
         }
     }
@@ -66,12 +68,13 @@ class Loan extends Model
      */
     private function calculateMonthlyComponents($loanBalance, $monthlyPayment)
     {
+        $startingBalance = $loanBalance;
         $monthlyInterestRate = ($this->annual_interest_rate / 12) / 100;
         $monthlyInterest = $loanBalance * $monthlyInterestRate;
         $monthlyPrincipal = $monthlyPayment - $monthlyInterest;
         $endingBalance = $loanBalance - $monthlyPrincipal;
 
-        return compact('monthlyInterest', 'monthlyPrincipal', 'endingBalance');
+        return compact('startingBalance','monthlyInterest','monthlyPayment', 'monthlyPrincipal', 'endingBalance');
     }
 
     /**
@@ -82,9 +85,27 @@ class Loan extends Model
      */
     private function createAmortizationRecord($monthNumber, array $scheduleData)
     {
-        $scheduleData['month_number'] = $monthNumber;
-        $amortizationSchedule = new AmortizationSchedule($scheduleData);
-        $this->amortizationSchedules()->save($amortizationSchedule);
+        try {
+            DB::beginTransaction();
+            // Create the amortization record
+            $amortization = new AmortizationSchedule([
+                'loan_id' => $this->id,
+                'month_number' => $monthNumber,
+                'starting_balance' => $scheduleData['startingBalance'],
+                'monthly_payment' => $scheduleData['monthlyPayment'],
+                'principal_component' => $scheduleData['monthlyPrincipal'],
+                'interest_component' => $scheduleData['monthlyInterest'],
+                'ending_balance' => $scheduleData['endingBalance'],
+            ]);   
+            $amortization->save();
+            
+            DB::commit();
+    
+            return true; 
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return false; 
+        }
     }
 
     /**
@@ -125,6 +146,33 @@ class Loan extends Model
             'ending_balance' => $newLoanBalance,
             'remaining_loan_term' => $remainingLoanTerm,
         ];
+    }
+
+    private function createExtraRepaymentRecord(array $extraRepaymentData){
+        try {
+            DB::beginTransaction();
+    
+            // Create the extra repayment record
+            $extraRepayment = new ExtraRepaymentSchedule([
+                'loan_id' => $this->id,
+                'month' => $extraRepaymentData['month_number'],
+                'starting_balance' => $extraRepaymentData['starting_balance'],
+                'monthly_payment' => $extraRepaymentData['monthly_payment'],
+                'principal_component' => $extraRepaymentData['principal_component'],
+                'interest_component' => $extraRepaymentData['interest_component'],
+                'extra_repayment_made' => $extraRepaymentData['extra_repayment_made'],
+                'ending_balance' => $extraRepaymentData['ending_balance'],
+                'remaining_loan_term' => $extraRepaymentData['remaining_loan_term'],
+            ]);
+            $extraRepayment->save();
+    
+            DB::commit();
+    
+            return true; 
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return false; 
+        }
     }
 
     /**

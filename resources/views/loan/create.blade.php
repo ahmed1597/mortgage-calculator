@@ -18,7 +18,7 @@
                 <input type="text" name="loan_term" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="user_id">User ID:</label>
+                <label for="user_id">Borrower ID:</label>
                 <input type="text" name="user_id" class="form-control" required>
             </div>
             <button type="submit" class="btn btn-primary">Create Loan</button>

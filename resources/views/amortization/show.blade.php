@@ -10,7 +10,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach ($amortizationSchedule as $entry)
+        @foreach ($loan->amortizationSchedules as $entry)
             <tr>
                 <td>{{ $entry->month }}</td>
                 <td>{{ $entry->starting_balance }}</td>

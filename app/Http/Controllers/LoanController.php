@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Loan;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 
 class LoanController extends Controller
@@ -44,7 +45,7 @@ class LoanController extends Controller
     {
         // Calculate effective interest rate and prepare data for the view
         $effectiveInterestRate = $loan->calculateEffectiveInterestRate();
-        
+
         return view('extra_repayment.show', compact('loan', 'effectiveInterestRate'));
     }
 
@@ -65,6 +66,7 @@ class LoanController extends Controller
 
     protected function generateAmortizationSchedule(Loan $loan)
     {
+        Log::info($loan);
         $loan->generateAmortizationSchedule();
     }
 

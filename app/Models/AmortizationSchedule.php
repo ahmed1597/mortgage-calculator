@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class AmortizationSchedule extends Model
 {
     protected $fillable = [
+        'loan_id',
         'month_number',
         'starting_balance',
         'monthly_payment',

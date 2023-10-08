@@ -7,7 +7,7 @@
             <p>Loan Amount: {{ $loan->loan_amount }}</p>
             <p>Annual Interest Rate: {{ $loan->annual_interest_rate }}%</p>
             <p>Original Loan Term: {{ $loan->loan_term }} years</p>
-            <p>User ID: {{ $loan->user_id }}</p>
+            <p>Borrower Name: {{ $loan->borrower->name }}</p>
         </div>
         <div>
             <table class="table">
